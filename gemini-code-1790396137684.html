@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordem Paranormal: Protocolo Zenith - Painel de Controle</title>
+    
+    <!-- Importando o Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzNMHiU_9Jv__CkywA8MxZ9ZdfkckVph8",
+            authDomain: "protocolo-zenith-f2f12.firebaseapp.com",
+            databaseURL: "https://protocolo-zenith-f2f12-default-rtdb.firebaseio.com",
+            projectId: "protocolo-zenith-f2f12",
+            storageBucket: "protocolo-zenith-f2f12.firebasestorage.app",
+            messagingSenderId: "14245841186",
+            appId: "1:14245841186:web:47dd15bdd72c6161c23d7b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.onValue = onValue;
+    </script>
+
+    <style>
+        :root {
+            --bg-base: #030508;
+            --bg-card: #0b101b;
+            --bg-card-inner: #111827;
+            --hud-cyan: #00ffcc;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --warning: #f59e0b;
+            --border-color: rgba(0, 255, 204, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 204, 0.08) 0%, transparent 50%),
+                linear-gradient(rgba(0,0,0,0.7) 0%, rgba(3,5,8,0.9) 100%),
+                linear-gradient(90deg, rgba(14,165,233,0.03) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(14,165,233,0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header-glitch-codes {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.7rem;
+            color: var(--info);
+            opacity: 0.6;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            word-break: break-all;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.4);
+        }
+
+        header h1 {
+            color: var(--text-main);
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            font-weight: 800;
+            text-shadow: 0 0 25px rgba(0, 255, 204, 0.3), 0 0 10px rgba(14, 165, 233, 0.5);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        header h1 span {
+            color: var(--hud-cyan);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-system {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--hud-cyan);
+            border: 1px solid var(--hud-cyan);
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-system:hover {
+            background: var(--hud-cyan);
+            color: var(--bg-base);
+            box-shadow: 0 0 10px var(--hud-cyan);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 0 10px var(--danger);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 30px;
+            max-width: 1450px;
+            margin: 0 auto;
+        }
+
+        .sheet-wrapper {
+            display: flex;
+            flex-direction: row;
+            background: var(--bg-card);
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.7), 0 0 1px 1px var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .sheet-wrapper:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 35px -8px rgba(0, 0, 0, 0.8), 0 0 10px 2px rgba(0, 255, 204, 0.3);
+        }
+
+        .character-box {
+            flex: 1.1;
+            position: relative;
+            min-height: 360px;
+            background: #000;
+            border-right: 1px solid var(--border-color);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .character-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+
+        .character-box:hover img {
+            filter: brightness(0.8);
+            transform: scale(1.03);
+        }
+
+        .character-box::after {
+            content: 'ALTERAR FOTO';
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(14, 19, 31, 0.9);
+            color: var(--hud-cyan);
+            border: 1px solid var(--hud-cyan);
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .character-box:hover::after {
+            opacity: 1;
+        }
+
+        .hud-panel {
+            flex: 1.45;
+            background: var(--bg-card);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .hud-badge {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--hud-cyan);
+            border: 1px solid var(--border-color);
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            border-radius: 4px;
+        }
+
+        .tactical-stats-bar {
+            display: flex;
+            gap: 12px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-item-discrete {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .stat-item-discrete:hover {
+            background: var(--bg-card-inner);
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .discrete-input {
+            background: transparent;
+            border: none;
+            color: var(--hud-cyan);
+            font-weight: 700;
+            font-size: 0.75rem;
+            width: 35px;
+            text-align: left;
+            outline: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .discrete-input:focus {
+            background: var(--bg-base);
+            border: 1px dashed var(--hud-cyan);
+            border-radius: 2px;
+            width: 42px;
+            padding: 0 2px;
+            cursor: text;
+        }
+
+        .name-section {
+            margin-bottom: 10px;
+        }
+
+        .name-input {
+            font-size: 1.15rem;
+            font-weight: 700;
+            width: 100%;
+            color: #fff;
+            padding: 2px 4px;
+            border-radius: 4px;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .name-input:hover { background: rgba(255, 255, 255, 0.03); }
+        .name-input:focus { background: var(--bg-card-inner); border-color: var(--hud-cyan); outline: none; }
+
+        .stealth-input {
+            background: transparent;
+            border: none;
+            color: inherit;
+            font: inherit;
+            width: 40px;
+            outline: none;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+        .stealth-input:hover { background: rgba(255, 255, 255, 0.05); }
+        .stealth-input:focus { background: var(--bg-card-inner); border: 1px dashed var(--hud-cyan); cursor: text; }
+
+        .attributes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .attribute-row {
+            background: var(--bg-card-inner);
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .attribute-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .attribute-title-val {
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            letter-spacing: 0.5px;
+        }
+
+        .damage-input-tiny {
+            width: 45px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            text-align: center;
+            border-radius: 3px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .damage-input-tiny:hover, .damage-input-tiny:focus {
+            border-color: var(--hud-cyan);
+            color: var(--hud-cyan);
+            background: rgba(0, 255, 204, 0.05);
+        }
+
+        .right-label-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .static-right-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fill-vida { background-color: var(--danger); box-shadow: 0 0 6px var(--danger); }
+        .fill-pe { background-color: var(--info); box-shadow: 0 0 6px var(--info); }
+        .fill-sanidade { background-color: #ffffff; box-shadow: 0 0 6px rgba(255,255,255,0.8); }
+
+        .gasolina-blocks-grid {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+            height: 6px;
+            margin-top: 2px;
+        }
+
+        .gas-segment {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .gas-segment:hover {
+            background: rgba(245, 158, 11, 0.5);
+            transform: scaleY(1.2);
+        }
+        .gas-segment.active {
+            background-color: var(--warning);
+            box-shadow: 0 0 6px var(--warning);
+        }
+
+        .hud-footer {
+            margin-top: 14px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-text-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.7rem;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .meta-text-input:focus {
+            background: var(--bg-card-inner);
+            border: 1px dashed var(--hud-cyan);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-glitch-codes">
+            ȻȺᵾⱣƗØƝ :: ⱣɆɌȻɆⱣƬIØƝ_ØVɆɌɌIĐɆ [[ ꋬ꒒ꏂ꒒ꋬꐇ ]] -> Vł₲łⱠȺƝƬⱠɆ:ØɃ$ɆɌVIƝG:ɎØU:0x00<br>
+            { đɆȼɍɏⱣⱦħøłđɆꞧ } [[ CⱧ₳Ꞧ₲Ɇ ]] [ F₳IⱠ ]<br>
+            !! [[ NØ Ɇ$C₳ⱣɆ ]]ZɆƝIƬH <<>> ȻɆƝƬɆɌ [[ $Ɏ$ƬɆM_ȻØⱠⱠ₣$Ɇ ]]
+        </div>
+        <h1>ORDEM PARANORMAL: <span>PROTOCOLO ZENITH</span></h1>
+        <p>Painel de Controle &mdash; Sincronização em Nuvem (Firebase Ativo)</p>
+    </header>
+
+    <div class="actions-bar">
+        <button class="btn-system btn-danger" onclick="resetarSessao()">Resetar Dados / Padrão</button>
+    </div>
+
+    <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="carregarImagem(event)">
+
+    <div class="grid-container" id="fichas-container">
+        <!-- As 5 Fichas -->
+    </div>
+
+    <script>
+        const DEFAULT_CHAR_IMG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEhUTExMWFhUXGBoaGBgYGBwaGBoaGBgXFhgXFRcYHSggGBolHRUVITEhJSkrLi4uGB8zODMtNygtLisBCgoKDg0OGxAQGi0lHyUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAOEA4QMBIgACEQEDEQH/xAAcAAABBQEBAQAAAAAAAAAAAAAFAAIDBAYBBwj/xABHEAACAQIEAwUEBAMEBwIFBQABAhEDIQAEEjEFIkFRYQYTMnGBFJGhsQeS0QgjM1LBUnKC4fDxFlOSorLwF0Njk9LiFhcX/xAAaAQADAQEBAQAAAAAAAAAAAAABAgMEAAUG/8QALhEAAgIBBAEDAwMEAwEAAAAAAAECEQMEEiExEyJBUWEUMlJxgZGh0SNCscHw/9oADAMBAAIRAxEAPwDwqj2X1Nn8J2Euf17H9Tj+VlabXFfH2V+M/L+1V3QYgH6H8j/vU4dO4/P8h/uq8Z1I2O9kYfR6p/QfnWdE3hR+P5A+p61e1y1vGkH9T/APjVd4/X8vvW2y30O/h4J+oP8h/upjG3X9v8Aqq8S4e5/b8vP9Ksw9/qP3j51y36r6f7K+jT8I9z+P0q0+LufqP9qzJ3j2/M/wDotjFf4jVvy/l8621D+x5Wk+j8E4v6f1q5GcfMfmP9qx28v8APp+Va4c/X8z/AJ1m576/T/R3hLqP3H6/hQ8W/+g/nQeJ/L/atW18f7UeA/sPhQ4u/6B+dG8TcfT+tZlrc0bX+v/a27HlT19I//9k=";
+
+        const fichasConfigPadrao = [
+            { id: 1, name: "Sô Tião", cls: "FAZENDEIRO", org: "RURAL", charid: "0714", nv: 3, def: 12, esq: 10, vida: 88, vidaMax: 100, pe: 77, peMax: 100, san: 68, sanMax: 99, gas: 3 },
+            { id: 2, name: "Agente 02", cls: "MERCENÁRIO", org: "URBANA", charid: "0922", nv: 5, def: 15, esq: 12, vida: 120, vidaMax: 150, pe: 50, peMax: 80, san: 80, sanMax: 100, gas: 5 },
+            { id: 3, name: "Agente 03", cls: "HACKER", org: "TECH", charid: "1102", nv: 2, def: 10, esq: 14, vida: 90, vidaMax: 100, pe: 60, peMax: 100, san: 70, sanMax: 100, gas: 2 },
+            { id: 4, name: "Agente 04", cls: "MÉDICO", org: "LAB", charid: "4421", nv: 1, def: 11, esq: 13, vida: 100, vidaMax: 100, pe: 100, peMax: 100, san: 100, sanMax: 100, gas: 4 },
+            { id: 5, name: "Agente Principal", cls: "ESPECIAL", org: "BASE", charid: "5555", nv: 1, def: 12, esq: 10, vida: 100, vidaMax: 100, pe: 100, peMax: 100, san: 100, sanMax: 100, gas: 5 }
+        ];
+
+        let dadosAtuais = JSON.parse(JSON.stringify(fichasConfigPadrao));
+        let listenerAtivo = false;
+
+        function renderizarFichasEstrutura() {
+            const container = document.getElementById('fichas-container');
+            container.innerHTML = '';
+
+            dadosAtuais.forEach(f => {
+                let imgSalva = localStorage.getItem('rpg_char_img_' + f.id) || DEFAULT_CHAR_IMG;
+
+                let html = `
+                <div class="sheet-wrapper" data-id="${f.id}">
+                    <div class="character-box" onclick="dispararSeletorArquivo(${f.id})" title="Trocar foto">
+                        <img id="char-img-${f.id}" src="${imgSalva}" alt="P${f.id}">
+                    </div>
+                    <div class="hud-panel">
+                        <div>
+                            <div class="hud-header">
+                                <span class="hud-badge">FICHA #0${f.id}</span>
+                            </div>
+                            <div class="tactical-stats-bar">
+                                <div class="stat-item-discrete" title="Defesa">
+                                    DEF: <input type="number" id="def-${f.id}" class="discrete-input salvarsession" value="${f.def}" oninput="capturarMudanca(${f.id})">
+                                </div>
+                                <div class="stat-item-discrete" title="Esquiva">
+                                    ESQ: <input type="number" id="esq-${f.id}" class="discrete-input salvarsession" value="${f.esq}" oninput="capturarMudanca(${f.id})">
+                                </div>
+                            </div>
+                            <div class="name-section">
+                                <input type="text" id="name-${f.id}" class="editable name-input salvarsession" value="${f.name}" oninput="capturarMudanca(${f.id})">
+                            </div>
+                            <div class="attributes-container">
+                                <div class="attribute-row">
+                                    <div class="attribute-header">
+                                        <div class="attribute-title-val" style="color: var(--danger);">
+                                            VIDA &nbsp;<input type="number" id="vida-val-${f.id}" class="stealth-input salvarsession" value="${f.vida}" oninput="capturarMudanca(${f.id})">/
+                                            <input type="number" id="vida-max-${f.id}" class="stealth-input salvarsession" value="${f.vidaMax}" oninput="capturarMudanca(${f.id})" style="width:32px;" title="Máx">
+                                        </div>
+                                        <div class="right-label-group">
+                                            <input type="number" id="vida-dano-${f.id}" class="damage-input-tiny" placeholder="-dano" onkeydown="processarDano(event, ${f.id}, 'vida')">
+                                            <span id="vida-lbl-${f.id}" class="static-right-label" style="color: var(--danger);">${f.vida}/${f.vidaMax}</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-track"><div id="vida-bar-${f.id}" class="progress-fill fill-vida"></div></div>
+                                </div>
+
+                                <div class="attribute-row">
+                                    <div class="attribute-header">
+                                        <div class="attribute-title-val" style="color: var(--info);">
+                                            PE &nbsp;<input type="number" id="pe-val-${f.id}" class="stealth-input salvarsession" value="${f.pe}" oninput="capturarMudanca(${f.id})">/
+                                            <input type="number" id="pe-max-${f.id}" class="stealth-input salvarsession" value="${f.peMax}" oninput="capturarMudanca(${f.id})" style="width:32px;" title="Máx">
+                                        </div>
+                                        <div class="right-label-group">
+                                            <input type="number" id="pe-dano-${f.id}" class="damage-input-tiny" placeholder="-gasto" onkeydown="processarDano(event, ${f.id}, 'pe')">
+                                            <span id="pe-lbl-${f.id}" class="static-right-label" style="color: var(--info);">${f.pe}/${f.peMax}</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-track"><div id="pe-bar-${f.id}" class="progress-fill fill-pe"></div></div>
+                                </div>
+
+                                <div class="attribute-row">
+                                    <div class="attribute-header">
+                                        <div class="attribute-title-val" style="color: #ffffff;">
+                                            SANIDADE &nbsp;<input type="number" id="san-val-${f.id}" class="stealth-input salvarsession" value="${f.san}" oninput="capturarMudanca(${f.id})">/
+                                            <input type="number" id="san-max-${f.id}" class="stealth-input salvarsession" value="${f.sanMax}" oninput="capturarMudanca(${f.id})" style="width:32px;" title="Máx">
+                                        </div>
+                                        <div class="right-label-group">
+                                            <input type="number" id="san-dano-${f.id}" class="damage-input-tiny" placeholder="-dano" onkeydown="processarDano(event, ${f.id}, 'san')">
+                                            <span id="san-lbl-${f.id}" class="static-right-label" style="color: #ffffff;">${f.san}/${f.sanMax}</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-track"><div id="san-bar-${f.id}" class="progress-fill fill-sanidade"></div></div>
+                                </div>
+
+                                <div class="attribute-row">
+                                    <div class="attribute-header">
+                                        <div class="attribute-title-val" style="color: var(--warning);">
+                                            GASOLINA &nbsp;<input type="number" id="gas-val-${f.id}" class="stealth-input salvarsession" value="${f.gas}" min="0" max="5" oninput="capturarMudanca(${f.id})" readonly>/5
+                                        </div>
+                                        <div class="right-label-group">
+                                            <span id="gas-lbl-${f.id}" class="static-right-label" style="color: var(--warning);">${f.gas}/5</span>
+                                        </div>
+                                    </div>
+                                    <div id="gas-blocks-${f.id}" class="gasolina-blocks-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hud-footer">
+                            <div class="meta-row">
+                                <div>CLS: <input type="text" id="cls-${f.id}" class="editable meta-text-input salvarsession" value="${f.cls}" style="width:85px;" oninput="capturarMudanca(${f.id})"></div>
+                                <div>ORG: <input type="text" id="org-${f.id}" class="editable meta-text-input salvarsession" value="${f.org}" style="width:55px;" oninput="capturarMudanca(${f.id})"></div>
+                            </div>
+                            <div class="meta-row" style="margin-top:2px;">
+                                <div>ID: <input type="text" id="charid-${f.id}" class="editable meta-text-input salvarsession" value="${f.charid}" style="width:50px;" oninput="capturarMudanca(${f.id})"></div>
+                                <div>NV: <input type="number" id="nv-${f.id}" class="editable meta-text-input salvarsession" value="${f.nv}" style="width:25px;" oninput="capturarMudanca(${f.id})"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+            atualizarBarrasVisuaisGlobais();
+        }
+
+        function atualizarBarrasVisuaisGlobais() {
+            dadosAtuais.forEach(f => {
+                atualizarHUDUnica(f.id, false);
+            });
+        }
+
+        function atualizarHUDUnica(id, salvarNoFirebase = true) {
+            let v = parseFloat(document.getElementById('vida-val-' + id)?.value) || 0;
+            let vMax = parseFloat(document.getElementById('vida-max-' + id)?.value) || 1;
+            let vidaBar = document.getElementById('vida-bar-' + id);
+            let vidaLbl = document.getElementById('vida-lbl-' + id);
+            if(vidaBar) vidaBar.style.width = Math.max(0, Math.min(100, (v / vMax) * 100)) + '%';
+            if(vidaLbl) vidaLbl.innerText = v + '/' + vMax;
+
+            let p = parseFloat(document.getElementById('pe-val-' + id)?.value) || 0;
+            let pMax = parseFloat(document.getElementById('pe-max-' + id)?.value) || 1;
+            let peBar = document.getElementById('pe-bar-' + id);
+            let peLbl = document.getElementById('pe-lbl-' + id);
+            if(peBar) peBar.style.width = Math.max(0, Math.min(100, (p / pMax) * 100)) + '%';
+            if(peLbl) peLbl.innerText = p + '/' + pMax;
+
+            let s = parseFloat(document.getElementById('san-val-' + id)?.value) || 0;
+            let sMax = parseFloat(document.getElementById('san-max-' + id)?.value) || 1;
+            let sanBar = document.getElementById('san-bar-' + id);
+            let sanLbl = document.getElementById('san-lbl-' + id);
+            if(sanBar) sanBar.style.width = Math.max(0, Math.min(100, (s / sMax) * 100)) + '%';
+            if(sanLbl) sanLbl.innerText = s + '/' + sMax;
+
+            let gasInput = document.getElementById('gas-val-' + id);
+            let gasLbl = document.getElementById('gas-lbl-' + id);
+            if(gasInput) {
+                let g = parseInt(gasInput.value) || 0;
+                if (g > 5) g = 5;
+                if (g < 0) g = 0;
+                gasInput.value = g;
+                if(gasLbl) gasLbl.innerText = g + '/5';
+
+                let container = document.getElementById('gas-blocks-' + id);
+                if(container) {
+                    container.innerHTML = '';
+                    for (let i = 1; i <= 5; i++) {
+                        let segment = document.createElement('div');
+                        segment.className = 'gas-segment';
+                        if (i <= g) segment.classList.add('active');
+                        
+                        let valorAlvo = i;
+                        if (i === g) {
+                            segment.onclick = () => { alterarGasolinaPorClique(id, i - 1); };
+                        } else {
+                            segment.onclick = () => { alterarGasolinaPorClique(id, valorAlvo); };
+                        }
+                        container.appendChild(segment);
+                    }
+                }
+            }
+
+            if (salvarNoFirebase) {
+                enviarDadosParaFirebase();
+            }
+        }
+
+        function capturarMudanca(id) {
+            atualizarHUDUnica(id, true);
+        }
+
+        function alterarGasolinaPorClique(id, valorClicado) {
+            let valInput = document.getElementById('gas-val-' + id);
+            if(valInput) {
+                valInput.value = valorClicado;
+                atualizarHUDUnica(id, true);
+            }
+        }
+
+        function processarDano(event, id, tipo) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                let valInput = document.getElementById(tipo + '-val-' + id);
+                let danoInput = document.getElementById(tipo + '-dano-' + id);
+                
+                let atual = parseFloat(valInput.value) || 0;
+                let dano = parseFloat(danoInput.value) || 0;
+                
+                let novoValor = atual - dano;
+                if (novoValor < 0) novoValor = 0;
+                
+                valInput.value = novoValor;
+                danoInput.value = '';
+                
+                atualizarHUDUnica(id, true);
+            }
+        }
+
+        function enviarDadosParaFirebase() {
+            if (!window.db) return;
+            let novasFichas = [];
+            dadosAtuais.forEach(f => {
+                let fichaObj = {
+                    id: f.id,
+                    name: document.getElementById('name-' + f.id)?.value || f.name,
+                    cls: document.getElementById('cls-' + f.id)?.value || f.cls,
+                    org: document.getElementById('org-' + f.id)?.value || f.org,
+                    charid: document.getElementById('charid-' + f.id)?.value || f.charid,
+                    nv: parseFloat(document.getElementById('nv-' + f.id)?.value) || f.nv,
+                    def: parseFloat(document.getElementById('def-' + f.id)?.value) || f.def,
+                    esq: parseFloat(document.getElementById('esq-' + f.id)?.value) || f.esq,
+                    vida: parseFloat(document.getElementById('vida-val-' + f.id)?.value) || 0,
+                    vidaMax: parseFloat(document.getElementById('vida-max-' + f.id)?.value) || 100,
+                    pe: parseFloat(document.getElementById('pe-val-' + f.id)?.value) || 0,
+                    peMax: parseFloat(document.getElementById('pe-max-' + f.id)?.value) || 100,
+                    san: parseFloat(document.getElementById('san-val-' + f.id)?.value) || 0,
+                    sanMax: parseFloat(document.getElementById('san-max-' + f.id)?.value) || 100,
+                    gas: parseInt(document.getElementById('gas-val-' + f.id)?.value) || 0
+                };
+                novasFichas.push(fichaObj);
+            });
+
+            window.dbSet(window.dbRef(window.db, 'protocolo_zenith_sessao'), { fichas: novasFichas });
+        }
+
+        function escutarFirebase() {
+            if (!window.db) return;
+            window.onValue(window.dbRef(window.db, 'protocolo_zenith_sessao'), (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.fichas) {
+                    data.fichas.forEach(fFirma => {
+                        atribuirValoresNaTelaSeDiferente(fFirma);
+                    });
+                }
+            });
+        }
+
+        function atribuirValoresNaTelaSeDiferente(f) {
+            atribuirSeDiferente('name-' + f.id, f.name);
+            atribuirSeDiferente('cls-' + f.id, f.cls);
+            atribuirSeDiferente('org-' + f.id, f.org);
+            atribuirSeDiferente('charid-' + f.id, f.charid);
+            atribuirSeDiferente('nv-' + f.id, f.nv);
+            atribuirSeDiferente('def-' + f.id, f.def);
+            atribuirSeDiferente('esq-' + f.id, f.esq);
+            atribuirSeDiferente('vida-val-' + f.id, f.vida);
+            atribuirSeDiferente('vida-max-' + f.id, f.vidaMax);
+            atribuirSeDiferente('pe-val-' + f.id, f.pe);
+            atribuirSeDiferente('pe-max-' + f.id, f.peMax);
+            atribuirSeDiferente('san-val-' + f.id, f.san);
+            atribuirSeDiferente('san-max-' + f.id, f.sanMax);
+            atribuirSeDiferente('gas-val-' + f.id, f.gas);
+
+            atualizarHUDUnica(f.id, false);
+        }
+
+        function atribuirSeDiferente(elementId, valor) {
+            let el = document.getElementById(elementId);
+            if (el && document.activeElement !== el) {
+                if (el.value != valor) {
+                    el.value = valor;
+                }
+            }
+        }
+
+        function dispararSeletorArquivo(id) {
+            let input = document.getElementById('file-input');
+            input.dataset.targetSheet = id;
+            input.value = '';
+            input.click();
+        }
+
+        function carregarImagem(event) {
+            let arquivo = event.target.files[0];
+            let id = event.target.dataset.targetSheet;
+            if (arquivo && id) {
+                let leitor = new FileReader();
+                leitor.onload = function(e) {
+                    let base64Image = e.target.result;
+                    let imgElement = document.getElementById('char-img-' + id);
+                    if (imgElement) {
+                        imgElement.src = base64Image;
+                        localStorage.setItem('rpg_char_img_' + id, base64Image);
+                    }
+                }
+                leitor.readAsDataURL(arquivo);
+            }
+        }
+
+        function resetarSessao() {
+            if (confirm("Tem certeza que deseja resetar os dados do servidor para o padrão?")) {
+                if (window.db) {
+                    window.dbSet(window.dbRef(window.db, 'protocolo_zenith_sessao'), null);
+                }
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        window.onload = function() {
+            renderizarFichasEstrutura();
+
+            // Carrega imagens locais salvas nas fichas
+            for (let i = 1; i <= 5; i++) {
+                let imgSalva = localStorage.getItem('rpg_char_img_' + i);
+                let imgElement = document.getElementById('char-img-' + i);
+                if (imgSalva && imgElement) {
+                    imgElement.src = imgSalva;
+                }
+            }
+
+            // Aguarda o Firebase conectar e começa a escutar as atualizações em tempo real
+            let checker = setInterval(() => {
+                if (window.db) {
+                    clearInterval(checker);
+                    escutarFirebase();
+                }
+            }, 500);
+        };
+    </script>
+</body>
+</html>
