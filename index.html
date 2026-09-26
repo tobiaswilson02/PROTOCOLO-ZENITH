@@ -63,6 +63,7 @@
             padding: 30px 20px;
         }
 
+        /* Ocultar setas de incremento/decremento (spinners) em inputs number */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -484,35 +485,38 @@
     </header>
 
     <div class="actions-bar">
+        <button class="btn-system" onclick="exportarDados()">Exportar Sessão (JSON)</button>
+        <button class="btn-system" onclick="dispararSeletorImportacao()">Importar Sessão (JSON)</button>
         <button class="btn-system btn-danger" onclick="resetarSessao()">Resetar Dados / Padrão</button>
     </div>
 
     <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="carregarImagem(event)">
+    <input type="file" id="json-file-input" accept=".json" style="display: none;" onchange="importarDados(event)">
 
     <div class="grid-container" id="fichas-container">
         <!-- As 5 Fichas -->
     </div>
 
     <script>
-        const DEFAULT_CHAR_IMG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEhUTExMWFhUXGBoaGBgYGBwaGBoaGBgXFhgXFRcYHSggGBolHRUVITEhJSkrLi4uGB8zODMtNygtLisBCgoKDg0OGxAQGi0lHyUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAOEA4QMBIgACEQEDEQH/xAAcAAABBQEBAQAAAAAAAAAAAAAFAAIDBAYBBwj/xABHEAACAQIEAwUEBAMEBwIFBQABAhEDIQAEEjEFIkFRYQYTMnGBFJGhsQeS0QgjM1LBUnKC4fDxFlOSorLwF0Njk9LiFhcX/xAAaAQADAQEBAQAAAAAAAAAAAAABAgMEAAUG/8QALhEAAgIBBAEDAwMEAwEAAAAAAAECEQMEEiExEyJBUWEUMlJxgZGh0SNCscHw/9oADAMBAAIRAxEAPwDwqj2X1Nn8J2Euf17H9Tj+VlabXFfH2V+M/L+1V3QYgH6H8j/vU4dO4/P8h/uq8Z1I2O9kYfR6p/QfnWdE3hR+P5A+p61e1y1vGkH9T/APjVd4/X8vvW2y30O/h4J+oP8h/upjG3X9v8Aqq8S4e5/b8vP9Ksw9/qP3j51y36r6f7K+jT8I9z+P0q0+LufqP9qzJ3j2/M/wDotjFf4jVvy/l8621D+x5Wk+j8E4v6f1q5GcfMfmP9qx28v8APp+Va4c/X8z/AJ1m576/T/R3hLqP3H6/hQ8W/+g/nQeJ/L/atW18f7UeA/sPhQ4u/6B+dG8TcfT+tZlrc0bX+v/a27HlT19I//9k=";
-
+        // Configuração padrão com o caminho direto para a pasta "img/" do repositório
         const fichasConfigPadrao = [
-            { id: 1, name: "Sô Tião", cls: "FAZENDEIRO", org: "RURAL", charid: "0714", nv: 3, def: 12, esq: 10, vida: 88, vidaMax: 100, pe: 77, peMax: 100, san: 68, sanMax: 99, gas: 3 },
-            { id: 2, name: "Agente 02", cls: "MERCENÁRIO", org: "URBANA", charid: "0922", nv: 5, def: 15, esq: 12, vida: 120, vidaMax: 150, pe: 50, peMax: 80, san: 80, sanMax: 100, gas: 5 },
-            { id: 3, name: "Agente 03", cls: "HACKER", org: "TECH", charid: "1102", nv: 2, def: 10, esq: 14, vida: 90, vidaMax: 100, pe: 60, peMax: 100, san: 70, sanMax: 100, gas: 2 },
-            { id: 4, name: "Agente 04", cls: "MÉDICO", org: "LAB", charid: "4421", nv: 1, def: 11, esq: 13, vida: 100, vidaMax: 100, pe: 100, peMax: 100, san: 100, sanMax: 100, gas: 4 },
-            { id: 5, name: "Agente Principal", cls: "ESPECIAL", org: "BASE", charid: "5555", nv: 1, def: 12, esq: 10, vida: 100, vidaMax: 100, pe: 100, peMax: 100, san: 100, sanMax: 100, gas: 5 }
+            { id: 1, name: "Sô Tião", cls: "FAZENDEIRO", org: "RURAL", charid: "0714", nv: 3, def: 12, esq: 10, vida: 88, vidaMax: 100, pe: 77, peMax: 100, san: 68, sanMax: 99, gas: 3, img: "img/personagem1.jpg" },
+            { id: 2, name: "Agente 02", cls: "MERCENÁRIO", org: "URBANA", charid: "0922", nv: 5, def: 15, esq: 12, vida: 120, vidaMax: 150, pe: 50, peMax: 80, san: 80, sanMax: 100, gas: 5, img: "img/personagem2.jpg" },
+            { id: 3, name: "Agente 03", cls: "HACKER", org: "TECH", charid: "1102", nv: 2, def: 10, esq: 14, vida: 90, vidaMax: 100, pe: 60, peMax: 100, san: 70, sanMax: 100, gas: 2, img: "img/personagem3.jpg" },
+            { id: 4, name: "Agente 04", cls: "MÉDICO", org: "LAB", charid: "4421", nv: 1, def: 11, esq: 13, vida: 100, vidaMax: 100, pe: 100, peMax: 100, san: 100, sanMax: 100, gas: 4, img: "img/personagem4.jpg" },
+            { id: 5, name: "Agente Principal", cls: "ESPECIAL", org: "BASE", charid: "5555", nv: 1, def: 12, esq: 10, vida: 100, vidaMax: 100, pe: 100, peMax: 100, san: 100, sanMax: 100, gas: 5, img: "img/personagem5.jpg" }
         ];
 
         let dadosAtuais = JSON.parse(JSON.stringify(fichasConfigPadrao));
-        let listenerAtivo = false;
+        let idPersonagemSelecionadoParaFoto = null;
 
         function renderizarFichasEstrutura() {
             const container = document.getElementById('fichas-container');
             container.innerHTML = '';
 
             dadosAtuais.forEach(f => {
-                let imgSalva = localStorage.getItem('rpg_char_img_' + f.id) || DEFAULT_CHAR_IMG;
+                // Procura primeiro se o usuário salvou uma foto personalizada localmente, senão usa a imagem padrão da pasta img/
+                let imgSalva = localStorage.getItem('rpg_char_img_' + f.id) || f.img;
 
                 let html = `
                 <div class="sheet-wrapper" data-id="${f.id}">
@@ -630,7 +634,7 @@
             if(peLbl) peLbl.innerText = p + '/' + pMax;
 
             let s = parseFloat(document.getElementById('san-val-' + id)?.value) || 0;
-            let sMax = parseFloat(document.getElementById('san-max-' + id)?.value) || 1;
+            let sMax = parseFloat(document.getElementById('san-max-' + id)?.value) === 0 ? 1 : parseFloat(document.getElementById('san-max-' + id)?.value) || 1;
             let sanBar = document.getElementById('san-bar-' + id);
             let sanLbl = document.getElementById('san-lbl-' + id);
             if(sanBar) sanBar.style.width = Math.max(0, Math.min(100, (s / sMax) * 100)) + '%';
@@ -700,6 +704,29 @@
             }
         }
 
+        function dispararSeletorArquivo(id) {
+            idPersonagemSelecionadoParaFoto = id;
+            let input = document.getElementById('file-input');
+            input.value = '';
+            input.click();
+        }
+
+        function carregarImagem(event) {
+            let arquivo = event.target.files[0];
+            if (arquivo && idPersonagemSelecionadoParaFoto !== null) {
+                let leitor = new FileReader();
+                leitor.onload = function(e) {
+                    let base64Image = e.target.result;
+                    let imgElement = document.getElementById('char-img-' + idPersonagemSelecionadoParaFoto);
+                    if (imgElement) {
+                        imgElement.src = base64Image;
+                        localStorage.setItem('rpg_char_img_' + idPersonagemSelecionadoParaFoto, base64Image);
+                    }
+                }
+                leitor.readAsDataURL(arquivo);
+            }
+        }
+
         function enviarDadosParaFirebase() {
             if (!window.db) return;
             let novasFichas = [];
@@ -719,7 +746,8 @@
                     peMax: parseFloat(document.getElementById('pe-max-' + f.id)?.value) || 100,
                     san: parseFloat(document.getElementById('san-val-' + f.id)?.value) || 0,
                     sanMax: parseFloat(document.getElementById('san-max-' + f.id)?.value) || 100,
-                    gas: parseInt(document.getElementById('gas-val-' + f.id)?.value) || 0
+                    gas: parseInt(document.getElementById('gas-val-' + f.id)?.value) || 0,
+                    img: f.img
                 };
                 novasFichas.push(fichaObj);
             });
@@ -739,6 +767,19 @@
             });
         }
 
+        function atribuirSeDiferente(elementId, valorNovo) {
+            const el = document.getElementById(elementId);
+            if (el && document.activeElement !== el) {
+                if (el.value != valorNovo) {
+                    el.value = valorNovo;
+                    const match = elementId.match(/-(\d+)$/);
+                    if (match) {
+                        atualizarHUDUnica(parseInt(match[1]), false);
+                    }
+                }
+            }
+        }
+
         function atribuirValoresNaTelaSeDiferente(f) {
             atribuirSeDiferente('name-' + f.id, f.name);
             atribuirSeDiferente('cls-' + f.id, f.cls);
@@ -754,72 +795,61 @@
             atribuirSeDiferente('san-val-' + f.id, f.san);
             atribuirSeDiferente('san-max-' + f.id, f.sanMax);
             atribuirSeDiferente('gas-val-' + f.id, f.gas);
-
-            atualizarHUDUnica(f.id, false);
-        }
-
-        function atribuirSeDiferente(elementId, valor) {
-            let el = document.getElementById(elementId);
-            if (el && document.activeElement !== el) {
-                if (el.value != valor) {
-                    el.value = valor;
-                }
-            }
-        }
-
-        function dispararSeletorArquivo(id) {
-            let input = document.getElementById('file-input');
-            input.dataset.targetSheet = id;
-            input.value = '';
-            input.click();
-        }
-
-        function carregarImagem(event) {
-            let arquivo = event.target.files[0];
-            let id = event.target.dataset.targetSheet;
-            if (arquivo && id) {
-                let leitor = new FileReader();
-                leitor.onload = function(e) {
-                    let base64Image = e.target.result;
-                    let imgElement = document.getElementById('char-img-' + id);
-                    if (imgElement) {
-                        imgElement.src = base64Image;
-                        localStorage.setItem('rpg_char_img_' + id, base64Image);
-                    }
-                }
-                leitor.readAsDataURL(arquivo);
-            }
         }
 
         function resetarSessao() {
-            if (confirm("Tem certeza que deseja resetar os dados do servidor para o padrão?")) {
-                if (window.db) {
-                    window.dbSet(window.dbRef(window.db, 'protocolo_zenith_sessao'), null);
-                }
+            if (confirm("Tem certeza que deseja resetar todas as fichas e dados salvos?")) {
                 localStorage.clear();
-                location.reload();
+                dadosAtuais = JSON.parse(JSON.stringify(fichasConfigPadrao));
+                renderizarFichasEstrutura();
+                enviarDadosParaFirebase();
             }
+        }
+
+        function exportarDados() {
+            let dados = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                let chave = localStorage.key(i);
+                dados[chave] = localStorage.getItem(chave);
+            }
+            let blob = new Blob([JSON.stringify(dados, null, 2)], {type: 'application/json'});
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'backup_fichas_zenith.json';
+            a.click();
+        }
+
+        function dispararSeletorImportacao() {
+            document.getElementById('json-file-input').click();
+        }
+
+        function importarDados(event) {
+            let arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            let leitor = new FileReader();
+            leitor.onload = function(e) {
+                try {
+                    let dados = JSON.parse(e.target.result);
+                    localStorage.clear();
+                    for (let chave in dados) {
+                        localStorage.setItem(chave, dados[chave]);
+                    }
+                    alert("Sessão importada com sucesso! A página será recarregada.");
+                    location.reload();
+                } catch (erro) {
+                    alert("Erro ao ler o arquivo JSON.");
+                }
+            };
+            leitor.readAsText(arquivo);
         }
 
         window.onload = function() {
             renderizarFichasEstrutura();
-
-            // Carrega imagens locais salvas nas fichas
-            for (let i = 1; i <= 5; i++) {
-                let imgSalva = localStorage.getItem('rpg_char_img_' + i);
-                let imgElement = document.getElementById('char-img-' + i);
-                if (imgSalva && imgElement) {
-                    imgElement.src = imgSalva;
-                }
-            }
-
-            // Aguarda o Firebase conectar e começa a escutar as atualizações em tempo real
-            let checker = setInterval(() => {
-                if (window.db) {
-                    clearInterval(checker);
-                    escutarFirebase();
-                }
-            }, 500);
+            setTimeout(() => {
+                escutarFirebase();
+            }, 1000);
         };
     </script>
 </body>
